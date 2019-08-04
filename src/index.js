@@ -3,8 +3,34 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import logo from './logo.svg';
 import './App.css';
+import {createStore} from 'redux'
+
+
+
+let initialState = {
+  count:0
+}
+
+let reducer = (oldState = initialState, action) => {
+  console.log("OldState", oldState, "Action", action)
+  switch (action.type) {
+    case "INCREMENT":
+      return { count: oldState.count + action.payload};
+    case "DECREMENT":
+      return {count: oldState.count - action.payload};
+    default:
+      return oldState
+  }
+};
+
+let store = createStore(reducer)
+console.log(store.getState())
 
 class App extends Component {
+  componentDidMount(){
+    store.subscribe(() => this.forceUpdate())
+  }
+
   render() {
     return (
       <div className="App">
@@ -27,29 +53,28 @@ class Header extends Component {
 }
 
 class Counter extends Component {
-  state = { count: 0 };
 
-  increment = () => {
-    this.setState(prevState => ({ count: prevState.count + 1 }));
+  increment = (num) => {
+    store.dispatch( { type: "INCREMENT", payload: num })
   };
 
-  decrement = () => {
-    this.setState(prevState => ({ count: prevState.count - 1 }));
+  decrement = (num) => {
+    store.dispatch ( { type: "DECREMENT", payload:num})
   };
 
   renderDescription = () => {
-    const remainder = this.state.count % 5;
+    const remainder = store.getState().count % 5;
     const upToNext = 5 - remainder;
-    return `The current count is less than ${this.state.count + upToNext}`;
+    return `The current count is less than ${store.getState().count + upToNext}`;
   };
 
   render() {
     return (
       <div className="Counter">
-        <h1>{this.state.count}</h1>
-        <button onClick={this.decrement}> - </button>
-        <button onClick={this.increment}> + </button>
-        <h3>{this.renderDescription()}</h3>
+        <h1>{store.getState().count}</h1>
+        <button onClick={()=>this.decrement(1)}> - 1 </button>
+        <button onClick={()=>this.increment(1)}> + 1</button>
+        <h3>{store.getState().count}</h3>
       </div>
     );
   }
